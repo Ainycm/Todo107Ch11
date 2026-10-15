@@ -1,13 +1,14 @@
 package com.mdi2.todo
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class TodoViewModel : ViewModel() {
+
+    companion object {
+        private const val TAG = "TodoViewModel"
+    }
 
     // _task is priv - only this class can access or modify it
     // compose-aware motable list that holds all current task
@@ -22,17 +23,8 @@ class TodoViewModel : ViewModel() {
 
     // adds a new task to the list
     fun addTask(title: String) {
-        if (title.isBlank()) return
 
-        // viewModelScope.launch starts a new coroutine in the viewModelScope
-        // Everything inside the launch block will run without blocking the UI
-        viewModelScope.launch {
-
-            // withContext switches to the IO dispatcher to run in the background
-            // The main thread will not block while waiting for the result
-            withContext(Dispatchers.IO) {
-                simulatesSlowOperation()
-            }
+        if (title.isNotBlank()) {
 
             _task.add(
                 Task(
@@ -40,33 +32,46 @@ class TodoViewModel : ViewModel() {
                     title = title.trim()
                 )
             )
+
+            // Log.i: information message - useful during development
+            Log.i(
+                TAG,
+                "Task added: $title"
+            )
+
+        } else {
+
+            // Log.w warning message - useful for indicating potential issues or unexpected behavior
+            Log.w(
+                TAG,
+                "addTask() called with blank title -- task was not added"
+            )
         }
     }
 
-    // challenge create the remove task function
+    // challenge create the removeTask function
     fun removeTask(taskId: Int) {
+
         _task.removeAll {
             it.id == taskId
         }
+
+        Log.i(
+            TAG,
+            "Task removed: $taskId"
+        )
     }
 
     // challenge return the number of tasks in the list
-    fun getTaskCount(): Int {
-        return _task.size
-    }
+    // use in unit test to verify task were added correctly
+    fun getTaskCount(): Int = _task.size
 
     // returns true if a task with the given title exist in the list
     // used in unit test to verify task were added correctly
     fun containsTask(title: String): Boolean {
+
         return _task.any {
             it.title == title
         }
-    }
-
-    // This simulates a slow operation running on the main thread
-    // Thread.sleep(5000) pauses the current thread for exactly 5 seconds
-    // For testing purposes only -- we will remove this after the demo
-    private fun simulatesSlowOperation() {
-        Thread.sleep(5000)
     }
 }
