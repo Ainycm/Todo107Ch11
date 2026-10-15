@@ -31,14 +31,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TodoScreen(viewModel: TodoViewModel) {
+fun TodoScreen(
+    viewModel: TodoViewModel,
+    modifier: Modifier = Modifier
+) {
 
     var inputText by remember {
         mutableStateOf("")
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(32.dp)
     ) {
@@ -107,9 +110,12 @@ fun TodoScreen(viewModel: TodoViewModel) {
                     task.id
                 }
             ) { task ->
+
                 TaskItem(
                     task = task,
-                    onDelete = { viewModel.removeTask(task.id) }
+                    onDelete = {
+                        viewModel.removeTask(task.id)
+                    }
                 )
             }
         }
